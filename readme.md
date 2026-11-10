@@ -67,5 +67,5 @@ Semua baris yang diubah ditandai komentar `# MODIF` di dalam kode.
 
 
 
-![alt text](image.png)
+![alt text](ss/image.png)
 
