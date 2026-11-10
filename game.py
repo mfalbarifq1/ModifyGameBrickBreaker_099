@@ -22,3 +22,54 @@ class GameObject(object):
         self.canvas.delete(self.item)
 
 
+# ============================================================
+# BOLA
+# ============================================================
+class Ball(GameObject):
+    def __init__(self, canvas, x, y):
+        self.radius = 10          # jari-jari bola
+        self.direction = [1, -1]  # [horizontal, vertikal]: 1=kanan/bawah, -1=kiri/atas
+        self.speed = 10           # jarak gerak bola per frame
+        item = canvas.create_oval(x-self.radius, y-self.radius,
+                                  x+self.radius, y+self.radius,
+                                  fill='orange')  # MODIF: warna bola (sebelumnya white)
+        super(Ball, self).__init__(canvas, item)  # panggil __init__ milik GameObject
+
+    def update(self):
+        # dipanggil tiap frame untuk menggerakkan bola
+        coords = self.get_position()
+        width = self.canvas.winfo_width()
+        # kena dinding kiri atau kanan -> balik arah horizontal
+        if coords[0] <= 0 or coords[2] >= width:
+            self.direction[0] *= -1
+        # kena atap -> balik arah vertikal
+        if coords[1] <= 0:
+            self.direction[1] *= -1
+        # jarak geser = arah x kecepatan
+        x = self.direction[0] * self.speed
+        y = self.direction[1] * self.speed
+        self.move(x, y)
+
+    def collide(self, game_objects):
+        # dipanggil saat bola menyentuh benda lain (paddle/brick)
+        coords = self.get_position()
+        x = (coords[0] + coords[2]) * 0.5  # titik tengah bola secara horizontal
+        if len(game_objects) > 1:
+            # kena 2 benda sekaligus -> pantul vertikal saja
+            self.direction[1] *= -1
+        elif len(game_objects) == 1:
+            game_object = game_objects[0]
+            coords = game_object.get_position()
+            if x > coords[2]:      # bola di kanan benda -> pantul ke kanan
+                self.direction[0] = 1
+            elif x < coords[0]:    # bola di kiri benda -> pantul ke kiri
+                self.direction[0] = -1
+            else:                  # bola tepat di atas/bawah benda -> pantul vertikal
+                self.direction[1] *= -1
+
+        # kalau benda yang kena adalah Brick, kurangi hit-nya
+        for game_object in game_objects:
+            if isinstance(game_object, Brick):
+                game_object.hit()
+
+
