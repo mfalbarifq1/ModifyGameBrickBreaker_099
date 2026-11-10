@@ -73,3 +73,32 @@ class Ball(GameObject):
                 game_object.hit()
 
 
+# ============================================================
+# PADDLE (papan pemukul)
+# ============================================================
+class Paddle(GameObject):
+    def __init__(self, canvas, x, y):
+        self.width = 100   # MODIF: lebih lebar (sebelumnya 80)
+        self.height = 10
+        self.ball = None   # bola yang menempel di paddle sebelum game mulai
+        item = canvas.create_rectangle(x - self.width / 2,
+                                       y - self.height / 2,
+                                       x + self.width / 2,
+                                       y + self.height / 2,
+                                       fill='cyan')  # MODIF: warna paddle (sebelumnya yellow)
+        super(Paddle, self).__init__(canvas, item)
+
+    def set_ball(self, ball):
+        # menyimpan bola agar ikut bergerak bersama paddle
+        self.ball = ball
+
+    def move(self, offset):
+        coords = self.get_position()
+        width = self.canvas.winfo_width()
+        # hanya bergerak kalau tidak keluar dari layar
+        if coords[0] + offset >= 0 and coords[2] + offset <= width:
+            super(Paddle, self).move(offset, 0)  # geser paddle (horizontal saja)
+            if self.ball is not None:
+                self.ball.move(offset, 0)        # bola ikut bergeser kalau masih menempel
+
+
